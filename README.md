@@ -20,6 +20,8 @@ sudo nmcli device connect enp3s0
 
 # WiFi Management/Control
 
+## WiFi ON/OFF
+
 Turn WiFi off:
 ```bash
 sudo nmcli radio wifi off
@@ -32,12 +34,15 @@ sudo nmcli radio wifi on
 ```
 > Nivel kernel: `sudo ip link set wlan0 up`
 
-Scan WiFi networks o Lista redes: SSID, señal, seguridad
+## Scan WiFi Networks
+
+List available networks (SSID, signal strength, security):
 ```bash
 nmcli device wifi list
 ```
 
-* Connect to WiFi:
+## WiFi Connection
+
 With password:
 ```bash
 sudo nmcli device wifi connect "switch_68B4E50100P" password "WIFI_PASSWORD"
@@ -48,7 +53,7 @@ sudo nmcli device wifi connect "switch_68B4E50100P" password "WIFI_PASSWORD"
 sudo nmcli device wifi connect "switch_68B4E50100P"
 ```
 
-Disconnect WiFi
+## WiFi Disconnection
 
 Disconnect current network (recommended):
 ```bash
@@ -64,9 +69,28 @@ sudo nmcli connection down id "switch_68B4E50100P"
 
 Get HTML page:
 curl http://192.168.0.1/index.html
-> Para extraer el contenido JSON cambiar la extension `.html` → `.json`
-> `--http0.9`: Si el servidor solo responde con HTTP 0.9
-> `--interface wlp4s0`: Especificar el uso de la interfaz WIFI 
+> To extract the JSON content, change the extension from `.html` to `.json`
+> `--http0.9`: Force HTTP/0.9 if the server only responds using that old protocol.
+> `--interface wlp4s0`: Use the WiFi interface explicitly (can fix issues when the request fails or behaves differently over another interface).
+
+To extract/download content shared on a web page:
+
+1. Display the page content to find the file name or identifier (it may be JSON, JS, HTML, etc.):
+```bash
+curl --interface wlp4s0 http://192.168.0.1/data.json
+```
+
+2. Once the file name is identified, download it:
+
+Image:
+```bash
+curl --interface wlp4s0 http://192.168.0.1/img/FILE_NAME.jpg -o image.jpg
+```
+
+Video:
+```bash
+curl --interface wlp4s0 http://192.168.0.1/img/FILE_NAME.mp4 -o video.mp4
+```
 
 
 
