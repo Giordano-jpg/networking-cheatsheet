@@ -1,41 +1,40 @@
 # Networking Cheatsheet
 Basic networking commands and practical use cases with nmcli and curl, including downloading shared resources from local devices.
 
+* NetworkManager (`nmcli`): High-level tool used to manage network connections. It interacts with NetworkManager and can be used via CLI or GUI equivalents.
+
+* `ip link`: Low-level kernel tool used to enable/disable network interfaces directly. It does not interact with NetworkManager and overrides it temporarily.
+
 # Ethernet
 
 Disconnect Ethernet:
 ```bash
 sudo nmcli device disconnect enp3s0
 ```
-Con `nmcli` es lo mismo que abrir la interfaz gráfica de NetworkManager y pulsar “Desconectar” en Ethernet.
-Con `ip link` se desactiva la interfaz a nivel del kernel; la tarjeta queda completamente deshabilitada
-> Nivel kernel: `sudo ip link set enp3s0 down`
+> Kernel level: `sudo ip link set enp3s0 down`
 
 
 Reconnect Ethernet:
 ```bash
 sudo nmcli device connect enp3s0
 ```
-> Nivel kernel: `sudo ip link set enp3s0 up`
+> Kernel level: `sudo ip link set enp3s0 up`
 
-# WiFi Management/Control
+# WiFi Management
 
 ## WiFi ON/OFF
 
 Turn WiFi off:
-Desactiva el WiFi a nivel de NetworkManager (alto nivel). Es equivalente a apagar el WiFi desde la interfaz gráfica.
 ```bash
 sudo nmcli radio wifi off
 ```
-Desactiva la interfaz a nivel kernel (bajo nivel).
-NetworkManager pierde control sobre el dispositivo y puede generar estados inconsistentes.
-> Nivel kernel: `sudo ip link set wlan0 down`
+> Kernel level: `sudo ip link set wlan0 down`
 
 Turn WiFi on:
 ```bash
 sudo nmcli radio wifi on
 ```
-> Nivel kernel: `sudo ip link set wlan0 up`
+> Kernel level: `sudo ip link set wlan0 up`
 
 ## Scan WiFi Networks
 
@@ -55,19 +54,15 @@ With password:
 ```bash
 sudo nmcli device wifi connect "SSID" password "WIFI_PASSWORD"
 ```
-> Esto crea una conexión persistente con `autoconnect=yes` (se reconectará automáticamente en futuros inicios)
+> This creates a persistent connection with `autoconnect=yes` (it will automatically reconnect on future startups)
 
 Temporary connection (recommended for hotspots):
 ```bash
 nmcli device wifi connect "SSID" password "WIFI_PASSWORD" --temporary
 ```
+> Creates a non-persistent connection that is not saved after disconnection.
 
-With password and no autoconection cada vez que inicia el ordenador o solo lo pongo como no autonecction ns :
-```bash
-nmcli device wifi connect "SSID" password "WIFI_PASSWORD" \  connection.autoconnect no
-```
-
-Disable autoconnect (alternative):
+With password (autoconnect disabled):
 ```bash
 nmcli device wifi connect "SSID" password "WIFI_PASSWORD" connection.autoconnect no
 ```
@@ -83,31 +78,35 @@ Disconnect current device:
 ```bash
 sudo nmcli device disconnect wlp4s0
 ```
-> Corta la conexión activa del dispositivo WiFi. Si la red WiFi se había configardo con `autoconnect=yes`, al reiniciar se reconectará automáticamente.
+> Terminates the active connection on the WiFi interface. If the network was configured with `autoconnect=yes`, it will automatically try to reconnect on the next system startup.
 
-Disconnect a specific connection.
+Disconnect a specific connection:
 ```bash
 sudo nmcli connection down id "SSID"
 ```
-> Desconecta solo esa red, sin apagar el WiFi. 
+> Deactivates only that specific connection profile without disabling WiFi. 
 
 Delete saved connection:
 ```bash
 nmcli connection delete "SSID"
 ```
-> Elimina el perfil guardado (evita reconexiones automáticas y problemas futuros).
+> Removes the saved connection profile, preventing automatic reconnection and avoiding potential conflicts.
 
 # HTTP / Web Access
 
 Get HTML page:
+```bash
 curl http://192.168.0.1/index.html
-> To extract the JSON content, change the extension from `.html` to `.json`
+```
+> To retrieve JSON data, replace `.html` with `.json`.
+> 
 > `--http0.9`: Force HTTP/0.9 if the server only responds using that old protocol.
+> 
 > `--interface wlp4s0`: Use the WiFi interface explicitly (can fix issues when the request fails or behaves differently over another interface).
 
 To extract/download content shared on a web page:
 
-1. Display the page content to find the file name or identifier (it may be JSON, JS, HTML, etc.):
+1. Inspect the page content to identify file names or resource identifiers (e.g., JSON, JS, HTML, etc.):
 ```bash
 curl --interface wlp4s0 http://192.168.0.1/data.json
 ```
