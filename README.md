@@ -23,9 +23,12 @@ sudo nmcli device connect enp3s0
 ## WiFi ON/OFF
 
 Turn WiFi off:
+Desactiva el WiFi a nivel de NetworkManager (alto nivel). Es equivalente a apagar el WiFi desde la interfaz gráfica.
 ```bash
 sudo nmcli radio wifi off
 ```
+Desactiva la interfaz a nivel kernel (bajo nivel).
+NetworkManager pierde control sobre el dispositivo y puede generar estados inconsistentes.
 > Nivel kernel: `sudo ip link set wlan0 down`
 
 Turn WiFi on:
@@ -41,29 +44,58 @@ List available networks (SSID, signal strength, security):
 nmcli device wifi list
 ```
 
+Show device status:
+```bash
+nmcli device status
+```
+
 ## WiFi Connection
 
 With password:
 ```bash
-sudo nmcli device wifi connect "switch_68B4E50100P" password "WIFI_PASSWORD"
+sudo nmcli device wifi connect "SSID" password "WIFI_PASSWORD"
+```
+> Esto crea una conexión persistente con `autoconnect=yes` (se reconectará automáticamente en futuros inicios)
+
+Temporary connection (recommended for hotspots):
+```bash
+nmcli device wifi connect "SSID" password "WIFI_PASSWORD" --temporary
 ```
 
-* Open network:
+With password and no autoconection cada vez que inicia el ordenador o solo lo pongo como no autonecction ns :
 ```bash
-sudo nmcli device wifi connect "switch_68B4E50100P"
+nmcli device wifi connect "SSID" password "WIFI_PASSWORD" \  connection.autoconnect no
+```
+
+Disable autoconnect (alternative):
+```bash
+nmcli device wifi connect "SSID" password "WIFI_PASSWORD" connection.autoconnect no
+```
+
+Open network:
+```bash
+sudo nmcli device wifi connect "SSID"
 ```
 
 ## WiFi Disconnection
 
-Disconnect current network (recommended):
+Disconnect current device:
 ```bash
 sudo nmcli device disconnect wlp4s0
 ```
+> Corta la conexión activa del dispositivo WiFi. Si la red WiFi se había configardo con `autoconnect=yes`, al reiniciar se reconectará automáticamente.
 
-Disconnect saved connection:
+Disconnect a specific connection.
 ```bash
-sudo nmcli connection down id "switch_68B4E50100P"
+sudo nmcli connection down id "SSID"
 ```
+> Desconecta solo esa red, sin apagar el WiFi. 
+
+Delete saved connection:
+```bash
+nmcli connection delete "SSID"
+```
+> Elimina el perfil guardado (evita reconexiones automáticas y problemas futuros).
 
 # HTTP / Web Access
 
